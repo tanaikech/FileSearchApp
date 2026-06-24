@@ -4,8 +4,8 @@
  * Author: Kanshi Tanaike
  * https://github.com/tanaikech/FileSearchApp
  *
- * Updated on 20251113 1048
- * version 1.0.0
+ * Updated on 20260624
+ * version 1.0.1
  */
 
 /**
@@ -18,35 +18,35 @@
  * @param {object} [options.config] - The configuration object specific to the method being called.
  * @returns {any} The result from the called method.
  */
-function fileSearchEntryPoint(options = {}) {
-  const { method, config = {}, ...constructorOptions } = options;
-  if (!method) {
-    throw new Error("A 'method' property must be specified in the options.");
-  }
+// function fileSearchEntryPoint(options = {}) {
+//   const { method, config = {}, ...constructorOptions } = options;
+//   if (!method) {
+//     throw new Error("A 'method' property must be specified in the options.");
+//   }
 
-  const fileSearch = new FileSearch(constructorOptions);
+//   const fileSearch = new FileSearch(constructorOptions);
 
-  if (typeof fileSearch[method] !== "function") {
-    throw new Error(
-      `Method '${method}' does not exist on the FileSearch class.`
-    );
-  }
+//   if (typeof fileSearch[method] !== "function") {
+//     throw new Error(
+//       `Method '${method}' does not exist on the FileSearch class.`
+//     );
+//   }
 
-  return fileSearch[method](config);
-}
+//   return fileSearch[method](config);
+// }
 
 /**
  * A class for interacting with the Google AI File Search API.
  */
-class FileSearch {
+var FileSearch = class FileSearch {
   /**
    * @param {object} params - The parameters.
    * @param {string} params.apiKey - The Gemini API key.
-   * @param {string} [params.model="models/gemini-2.5-flash"] - The Gemini model name.
+   * @param {string} [params.model="models/gemini-3.1-flash-lite"] - The Gemini model name.
    */
   constructor({
     apiKey,
-    model = "models/gemini-2.5-flash" /** or models/gemini-2.5-pro */,
+    model = "models/gemini-3.1-flash-lite" /** or models/gemini-2.5-pro */,
   }) {
     if (!apiKey) {
       throw new Error("API key is required.");
@@ -336,7 +336,7 @@ class FileSearch {
       if (!supportedMimeTypes.includes(fileBlob.getContentType())) {
         return UrlFetchApp.fetch(
           `https://drive.google.com/thumbnail?sz=w1000&id=${fileId}`,
-          { headers: { authorization: "Bearer " + ScriptApp.getOAuthToken() } }
+          { headers: { authorization: "Bearer " + ScriptApp.getOAuthToken() } },
         ).getBlob();
       }
       return fileBlob;
@@ -350,7 +350,7 @@ class FileSearch {
         fileBlob = Utilities.newBlob(
           text,
           mimeType || MimeType.PLAIN_TEXT,
-          displayName || `doc-${Date.now()}`
+          displayName || `doc-${Date.now()}`,
         );
       } else if (url) {
         fileBlob = UrlFetchApp.fetch(url).getBlob();
@@ -369,7 +369,7 @@ class FileSearch {
       const payload = {
         metadata: Utilities.newBlob(
           JSON.stringify(metadata),
-          "application/json"
+          "application/json",
         ),
         file: convMimeType_(fileBlob),
       };
@@ -378,7 +378,7 @@ class FileSearch {
         endpoint,
         { method: "post", payload },
         {},
-        true
+        true,
       );
       const finalOperation = this._pollOperation(operation);
       return `Processing complete for: ${metadata.displayName}\nDocument name is "${finalOperation.name}".`;
@@ -494,7 +494,7 @@ class FileSearch {
   documents_query({ name, query, resultsCount, metadataFilters = [] }) {
     if (!name || !query) {
       throw new Error(
-        "Provide both 'name' (the document resource name) and 'query'."
+        "Provide both 'name' (the document resource name) and 'query'.",
       );
     }
     const endpoint = `/${name}:query`;
@@ -596,4 +596,4 @@ class FileSearch {
       throw new Error(`API Error: ${responseCode} - ${responseBody}`);
     }
   }
-}
+};

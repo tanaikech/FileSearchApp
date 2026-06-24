@@ -206,4 +206,9 @@ function generate_content() {
 
   1. Initial release.
 
+- v1.0.1 (June 24, 2026)
+
+  1. Upgraded default model to `models/gemini-3.1-flash-lite`.
+  2. Wrapped `FileSearch` into a standard modern export syntax.
+
 [TOP](#top)
