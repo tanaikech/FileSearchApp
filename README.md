@@ -184,6 +184,24 @@ function generate_content() {
 
 ---
 
+## Dynamic Model & Thinking Routing (Gemini Decisions API)
+
+`FileSearchApp` supports automatic model and `thinkingLevel` selection powered by the **Gemini Decisions API (`gemini-decision-1`, 0 output tokens)** across the 6-model pool (`gemini-3.5-flash-lite`, `gemini-3.8-flash`, `gemini-4-hydrogen`, `gemini-4-neon`, `gemini-4-argon`, `gemini-4-carbon`).
+
+- **`modelRouting: "efficient"` (Default)**: Routes simple/standard tasks to low-cost fast models (`gemini-3.5-flash-lite` / `gemini-3.8-flash` / `gemini-4-hydrogen`) and automatically escalates to frontier models (`gemini-4-argon` / `gemini-4-carbon`) when complex reasoning or explicit maximum-capability directives are detected in the prompt.
+- **`modelRouting: "quality"`**: Prioritizes maximum accuracy and deeper thinking over cost, with GAS 6-minute execution timeout guardrails.
+- **`modelRouting: "fixed"`**: Bypasses the Decisions API completely and uses only the configured `model` and `generationConfig`.
+- **Automatic Free-Tier Fallback (`billingTier: "auto"`)**: If a Paid-only model (`neon`/`argon`/`carbon`) returns HTTP 403/429, automatically falls back to `models/gemini-4-hydrogen`.
+- **Per-Generation Logging & JSON Comparison**: Logs `[ModelRouting] role=... | mode=... | model=... | thinking=... | reason=...` on every generation call. Use `getModelRoutingConfig()` / `previewModelRouting(prompt)` to inspect/compare modes as JSON, and `GeminiDecisionsRouter.configureDefaults(...)` / `registerModels(...)` to customize for future Gemini models.
+
+```javascript
+const fsApp = new FileSearch({
+  apiKey: "YOUR_GEMINI_API_KEY",
+  modelRouting: "efficient", // "efficient" (default) | "quality" | "fixed"
+});
+```
+
+---
 <a name="licence"></a>
 
 # Licence
@@ -210,5 +228,9 @@ function generate_content() {
 
   1. Upgraded default model to `models/gemini-3.1-flash-lite`.
   2. Wrapped `FileSearch` into a standard modern export syntax.
+
+- v1.1.0 (November 27, 2026)
+  1. Upgraded default model to `models/gemini-4-hydrogen`, fixed `convMimeType_`, filtered thought parts, and added `_pollOperation` max-attempts guard.
+  2. Integrated optional fail-open `GeminiDecisionsRouter` support (`modelRouting: "efficient" | "quality" | "fixed"`) and `generationConfig` forwarding in `generate_content()`.
 
 [TOP](#top)
